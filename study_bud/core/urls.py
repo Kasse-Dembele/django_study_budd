@@ -1,4 +1,9 @@
 from django.urls import path
 from . import views
 
-url_patterns = []
+app_name = "core"
+
+urlpatterns = [
+    path("", views.home, name="home"),
+    path("room/<int:pk>", views.room, name="room"),
+]
