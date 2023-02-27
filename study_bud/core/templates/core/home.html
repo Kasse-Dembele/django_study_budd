@@ -1,33 +1,46 @@
 {% extends 'main.html'%};
 {% block content %}
     
-    <h1>
-        Home Template
-    </h1>
-
-    <div>
-        <a href="{% url 'core:create-room'%}">Create Room</a>
-
-
+    <style>
+        .home-container{
+            display: grid;
+            grid-template-columns: 1fr 3fr;
+        }
+    </style>
+    <div class="home-container">
         <div>
+            <h3>Browse Topics</h3>
+            <hr>
+            <div>
+                <a href="{% url 'core:home' %}">All</a>
+            </div>
             {% for topic in topics %}
-                <a href="{% url 'core:home' %}?topic={{topic.id}}">{{topic.name}}</a>
+                <div>
+                    <a href="{% url 'core:home' %}?q={{topic.name}}">{{topic.name}}</a>
+                </div>
+                
             {% endfor %}
         </div>
-        
 
         <div>
+            <a href="{% url 'core:create-room'%}">Create Room</a>
+            <p>{{rooms_count}} Available</p>
 
-            {% for room in rooms %}
-                <div>
-                    <a href="{% url 'core:edit-room' room.id %}">Edit Room</a>
-                    <a href="{% url 'core:delete-room' room.id %}">Delete Room</a>
-                    <span>@{{room.host.username}}</span>                    
-                    <h5>{{room.id}} -- <a href="{% url 'core:room' room.id %}"></a>{{room.name}}</a></h5>
-                    <small>{{room.topic.name}}</small>
-                    <hr>
-                </div>
-            {% endfor %}
+            <div>
+
+                {% for room in rooms %}
+                    <div>
+                        {% if request.user == room.host %}
+                            <a href="{% url 'core:edit-room' room.id %}">Edit Room</a>
+                            <a href="{% url 'core:delete-room' room.id %}">Delete Room</a>
+                        {% endif %}
+                        <span>@{{room.host.username}}</span>                    
+                        <h5>{{room.id}} -- <a href="{% url 'core:room' room.id %}"></a>{{room.name}}</a></h5>
+                        <small>{{room.topic.name}}</small>
+                        <hr>
+                    </div>
+                {% endfor %}
+            </div>
         </div>
     </div>
 

@@ -5,6 +5,9 @@ app_name = "core"
 
 urlpatterns = [
     path("", views.home, name="home"),
+    path("login", views.sign_in, name="login"),
+    path("logout", views.log_out, name="logout"),
+    path("register", views.sign_up, name="register"),
     path("room/<int:pk>", views.room, name="room"),
     path("room/new", views.create_room, name="create-room"),
     path("room/<int:pk>/", views.edit_room, name="edit-room"),
