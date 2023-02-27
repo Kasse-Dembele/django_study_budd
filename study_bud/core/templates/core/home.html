@@ -35,7 +35,7 @@
                             <a href="{% url 'core:delete-room' room.id %}">Delete Room</a>
                         {% endif %}
                         <span>@{{room.host.username}}</span>                    
-                        <h5>{{room.id}} -- <a href="{% url 'core:room' room.id %}"></a>{{room.name}}</a></h5>
+                        <h5>{{room.id}} -- <a href="{% url 'core:room' room.id %}">{{room.name}}</a></h5>
                         <small>{{room.topic.name}}</small>
                         <hr>
                     </div>
