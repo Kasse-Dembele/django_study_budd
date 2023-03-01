@@ -12,7 +12,7 @@ from django.contrib.auth.forms import UserCreationForm
 
 
 def home(request):
-    q = request.GET.get("q", 0)
+    q = request.GET.get("q", "")
     rooms = Room.objects.all()
     topics = Topic.objects.all()
     if q:
@@ -21,22 +21,32 @@ def home(request):
             | Q(name__icontains=q)
             | Q(description__icontains=q)
         )
+    room_messages = Message.objects.filter(Q(room__topic__name__icontains=q))
     rooms_count = rooms.count()
-    context = {"rooms": rooms, "topics": topics, "rooms_count": rooms_count}
+    context = {
+        "rooms": rooms,
+        "topics": topics,
+        "rooms_count": rooms_count,
+        "room_messages": room_messages,
+    }
     return render(request, "core/home.html", context)
 
 
 def room(request, pk):
     room = Room.objects.get(id=pk)
-    room_messages = room.message_set.all().order_by('-created')
+    room_messages = room.message_set.all().order_by("-created")
     if request.method == "POST":
-        messages = Message.objects.create(
-            user=request.user,
-            room= room,
-            body=request.POST.get("body")
+        room_messages = Message.objects.create(
+            user=request.user, room=room, body=request.POST.get("body")
         )
+        room.participants.add(request.user)
         return redirect("core:room", pk=room.id)
-    context = {"room": room, "room_messages": room_messages}
+    participants = room.participants.all()
+    context = {
+        "room": room,
+        "room_messages": room_messages,
+        "participants": participants,
+    }
     return render(request, "core/room.html", context)
 
 
@@ -117,3 +127,28 @@ def sign_up(request):
 def log_out(request):
     logout(request)
     return redirect("core:home")
+
+
+@login_required(login_url="core:login")
+def delete_message(request, pk):
+    message = Message.objects.get(id=pk)
+    if request.user != message.user:
+        return HttpResponse("Your are not allowed ")
+    if request.method == "POST":
+        message.delete()
+        return redirect("core:home")
+    return render(request, "core/delete.html", {"obj": message})
+
+
+def user_profile(request, pk):
+    user = User.objects.get(id=pk)
+    topics = Topic.objects.all()
+    rooms = user.room_set.all()
+    room_messages = user.message_set.all()
+    context = {
+        "user": user,
+        "rooms": rooms,
+        "room_messages": room_messages,
+        "topics": topics,
+    }
+    return render(request, "core/profile.html", context)
