@@ -7,6 +7,7 @@ from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import UserCreationForm
+from .forms import UserForm
 
 # Create your views here.
 
@@ -53,29 +54,40 @@ def room(request, pk):
 @login_required(login_url="core:login")
 def create_room(request):
     form = RoomForm()
+    topics = Topic.objects.all()
     if request.method == "POST":
-        form = RoomForm(request.POST)
-        if form.is_valid():
-            form.save()
+        topic_name = request.POST.get("topic")
+        topic = Topic.objects.get_or_create(name=topic_name)
+        Room.objects.create(
+            host=request.user,
+            name=request.POST.get("name"),
+            description=request.POST.get("description"),
+            topic=topic,
+        )
+
         return redirect("core:home")
 
-    context = {"form": form}
+    context = {"form": form, "topics": topics}
     return render(request, "core/room_form.html", context)
 
 
 @login_required(login_url="core:login")
 def edit_room(request, pk):
     room = Room.objects.get(id=pk)
+    topics = Topic.objects.all()
     form = RoomForm(instance=room)
 
     if request.user != room.host:
         return HttpResponse("Your are not allowed ")
     if request.method == "POST":
-        form = RoomForm(request.POST, instance=room)
-        if form.is_valid():
-            form.save()
-            return redirect("core:home")
-    context = {"form": form}
+        topic_name = request.POST.get("topic")
+        topic = Topic.objects.get_or_create(name=topic_name)
+        room.name = request.POST.get("name")
+        room.topic = topic
+        room.description = request.POST.get("description")
+        room.save()
+        return redirect("core:home")
+    context = {"form": form, "topics": topics, "room": room}
     return render(request, "core/room_form.html", context)
 
 
@@ -152,3 +164,15 @@ def user_profile(request, pk):
         "topics": topics,
     }
     return render(request, "core/profile.html", context)
+
+
+@login_required(login_url="core:login")
+def edit_user(request):
+    form = UserForm(instance=request.user)
+    if request.method == "POST":
+        form = UserForm(request.POST, instance=request.user)
+        if form.is_valid():
+            form.save()
+            return redirect("core:home")
+    context = {"form": form}
+    return render(request, "core/edit-user.html", context)
