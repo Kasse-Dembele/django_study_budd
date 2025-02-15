@@ -12,3 +12,5 @@ jobs:
 
       - name: Activate Checker
         uses: Kasse-Dembele/checkMate@main
+        with:
+          github_token: ${{ secrets.GH_TOKEN }}
