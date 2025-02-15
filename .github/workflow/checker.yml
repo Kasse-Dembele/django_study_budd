@@ -1,0 +1,14 @@
+name: Pr Checker
+
+on:
+  pull_request:
+
+jobs:
+  post-checklist:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Activate Checker
+        uses: Kasse-Dembele/checkMate
