@@ -11,4 +11,4 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Activate Checker
-        uses: Kasse-Dembele/checkMate
+        uses: Kasse-Dembele/checkMate@main
